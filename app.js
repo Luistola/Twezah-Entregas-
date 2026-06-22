@@ -6,10 +6,10 @@
 
 const CONFIG = {
   // URL do Google Apps Script (publicado como Web App)
-  SCRIPT_URL: "SCRIPT_URL: "https://script.google.com/macros/s/AKfycbxveBv0yZUa2G4oasolxml-aC1uNm_yxwJU1XDl5R-yjEhAf7d6XdaQ8ikRoAJz-NEnhg/exec",
+  SCRIPT_URL: "https://script.google.com/macros/s/SEU_SCRIPT_ID_AQUI/exec",
 
   // Número WhatsApp da TWEZAH (inclua código do país, sem +)
-  WHATSAPP_NUM: "244924065125",
+  WHATSAPP_NUM: "244900000000",
 
   // Credenciais de entregadores  { user: "senha" }
   ENTREGADORES: {
