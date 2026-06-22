@@ -13,15 +13,17 @@ const CONFIG = {
 
   // Credenciais de entregadores  { user: "senha" }
   ENTREGADORES: {
-    "entregador1": "senha123",
-    "entregador2": "senha456",
+    "quilemba": "senha123",
+    "mapunda": "senha456",
+    "kilamba": "senha456",
+     
     "joao":        "twezah2024",
   },
 
   // Credenciais admin
   ADMINS: {
     "admin":   "twezah@admin",
-    "gestor":  "gestao2024",
+    "gestor":  "luis8989",
   },
 };
 
