@@ -356,3 +356,23 @@ tr:nth-child(even) td { background: var(--ice); }
 @media (min-width: 600px) {
   .tab-content { padding: 20px; max-width: 640px; margin: 0 auto; }
 }
+
+/* ─── AVISO DADOS ────────────────────────────────────────── */
+.aviso-dados {
+  display: flex; gap: 10px; align-items: flex-start;
+  background: #FFF0F0;
+  border: 2px solid var(--red);
+  border-left: 5px solid var(--red);
+  border-radius: var(--radius-sm);
+  padding: 12px 14px;
+}
+.aviso-icon { font-size: 1.4rem; flex-shrink: 0; margin-top: 2px; }
+.aviso-dados strong {
+  display: block; color: var(--red);
+  font-size: .85rem; text-transform: uppercase;
+  letter-spacing: .5px; margin-bottom: 4px;
+}
+.aviso-dados p {
+  font-size: .82rem; color: #7B1A1A; line-height: 1.5; margin: 0;
+}
+.aviso-dados u { text-decoration-color: var(--red); }
