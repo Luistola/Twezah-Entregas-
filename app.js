@@ -311,15 +311,28 @@ function abrirWhatsApp() {
   if (!p) return;
 
   const msg = encodeURIComponent(
-    `Olá TWEZAH. Acabei de fazer um pedido.\n\n` +
-    `🆔 ID: ${p.id}\n` +
+    `✅ *Pedido TWEZAH recebido com sucesso!*\n\n` +
+    `🆔 ID: *${p.id}*\n` +
     `👤 Nome: ${p.nome}\n` +
-    `📞 Telefone: ${p.tel}\n` +
-    `📍 Endereço: ${[p.bairro, p.rua, p.bloco, p.casa, p.apto].filter(Boolean).join(", ")}\n` +
-    `💧 Quantidade: ${p.litros} litros\n` +
-    `   Bidões 20L: ${p.b20} | 10L: ${p.b10} | 5L: ${p.b5}\n` +
-    `💳 Pagamento: ${p.pagamento}\n\n` +
-    `Obrigado! 🙏`
+    `💧 Quantidade: *${p.litros} litros*\n` +
+    `   • Bidões 20L: ${p.b20}\n` +
+    `   • Bidões 10L: ${p.b10}\n` +
+    `   • Bidões 5L: ${p.b5}\n` +
+    `💳 Pagamento: ${p.pagamento}\n` +
+    `📍 ${p.bairro}, ${p.rua || ""}\n\n` +
+    `━━━━━━━━━━━━━━━━━━━━\n` +
+    `🌊 *Como fazer pedidos TWEZAH:*\n\n` + 
+    `1️⃣ Acesse a nossa plataforma:\n` +
+    `👉 https://luistola.github.io/Twezah-Entregas-/\n\n` +
+    `2️⃣ Preencha os seus dados\n` +
+    `3️⃣ Escolha a quantidade de água\n` +
+    `4️⃣ Seleccione a forma de pagamento\n` +
+    `5️⃣ Clique em *Enviar Pedido*\n\n` +
+    `━━━━━━━━━━━━━━━━━━━━\n` +
+    `💡 *Guarde este link no seu telemóvel:*\n` +
+    `https://luistola.github.io/Twezah-Entregas-/\n\n` +
+    `📞 Dúvidas? Fale connosco aqui mesmo pelo WhatsApp.\n\n` +
+    `🌊 *Obrigado por escolher TWEZAH!*`
   );
 
   const url = `https://wa.me/${CONFIG.WHATSAPP_NUM}?text=${msg}`;
