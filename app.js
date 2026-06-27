@@ -6,24 +6,22 @@
 
 const CONFIG = {
   // URL do Google Apps Script (publicado como Web App)
-  SCRIPT_URL: "https://script.google.com/macros/s/AKfycbxveBv0yZUa2G4oasolxml-aC1uNm_yxwJU1XDl5R-yjEhAf7d6XdaQ8ikRoAJz-NEnhg/exec",
+  SCRIPT_URL: "https://script.google.com/macros/s/SEU_SCRIPT_ID_AQUI/exec",
 
   // Número WhatsApp da TWEZAH (inclua código do país, sem +)
-  WHATSAPP_NUM: "244922861005",
+  WHATSAPP_NUM: "244900000000",
 
   // Credenciais de entregadores  { user: "senha" }
   ENTREGADORES: {
-    "quilemba": "senha123",
-    "mapunda": "senha456",
-    "kilamba": "senha456",
-     
+    "entregador1": "senha123",
+    "entregador2": "senha456",
     "joao":        "twezah2024",
   },
 
   // Credenciais admin
   ADMINS: {
     "admin":   "twezah@admin",
-    "gestor":  "luis8989",
+    "gestor":  "gestao2024",
   },
 };
 
@@ -36,7 +34,8 @@ let state = {
   entregadorUser: null,
   adminUser:      null,
   adminTodos:     [],
-  pendingPedido:  null,  // dados para whatsapp após envio
+  pendingPedido:  null,
+  pontosLitros:   0,     // litros acumulados por fidelidade
 };
 
 /* ═══════════════════════════════════════════════════════════
@@ -53,9 +52,10 @@ window.addEventListener("DOMContentLoaded", () => {
 
 function init() {
   // Carregar dados do localStorage
-  state.perfil    = loadLS("twezah_perfil");
-  state.historico = loadLS("twezah_historico") || [];
-  state.lastPedido = loadLS("twezah_last_pedido");
+  state.perfil       = loadLS("twezah_perfil");
+  state.historico    = loadLS("twezah_historico") || [];
+  state.lastPedido   = loadLS("twezah_last_pedido");
+  state.pontosLitros = loadLS("twezah_pontos") || 0;
 
   // Data de hoje no campo do pedido
   document.getElementById("pedido-date").textContent = formatDate(new Date());
@@ -136,7 +136,12 @@ function mostrarPerfilView() {
   ];
   document.getElementById("perfil-display").innerHTML = fields.map(([l, v]) =>
     `<div class="perfil-item"><span class="perfil-lbl">${l}</span><span class="perfil-val">${v}</span></div>`
-  ).join("");
+  ).join("") + `
+    <div class="perfil-item full">
+      <span class="perfil-lbl">🎁 Litros Acumulados</span>
+      <span class="perfil-val pontos-val" id="pontos-display">${state.pontosLitros}L grátis disponíveis</span>
+    </div>
+  `;
 
   document.getElementById("perfil-view").classList.remove("hidden");
   document.getElementById("perfil-form").classList.add("hidden");
@@ -249,6 +254,13 @@ function enviarPedido() {
     horaEntrega: "",
   };
 
+  // Calcular pontos — cada 20L ganha 0.5L
+  const pontosGanhos = Math.floor(litros / 20) * 0.5;
+  state.pontosLitros = parseFloat((state.pontosLitros + pontosGanhos).toFixed(1));
+  saveLS("twezah_pontos", state.pontosLitros);
+  pedido.pontosGanhos = pontosGanhos;
+  pedido.pontosTotal  = state.pontosLitros;
+
   // Guardar localmente
   state.historico.unshift(pedido);
   saveLS("twezah_historico", state.historico);
@@ -259,7 +271,8 @@ function enviarPedido() {
   // Enviar para Google Sheets
   enviarParaSheet(pedido);
 
-  // Mostrar mensagem de sucesso
+  // Mostrar mensagem de sucesso com pontos
+  atualizarPontosUI(pontosGanhos);
   document.getElementById("msg-sucesso").classList.remove("hidden");
 
   // Reset quantidades
@@ -304,6 +317,29 @@ function repetirUltimo() {
 }
 
 /* ═══════════════════════════════════════════════════════════
+   PONTOS / LITROS FIDELIDADE
+═══════════════════════════════════════════════════════════ */
+function atualizarPontosUI(pontosGanhos) {
+  // Actualizar display no perfil se visível
+  const el = document.getElementById("pontos-display");
+  if (el) el.textContent = `${state.pontosLitros}L grátis disponíveis`;
+
+  // Mostrar toast com pontos ganhos
+  if (pontosGanhos > 0) {
+    setTimeout(() => toast(`🎁 +${pontosGanhos}L acumulados! Total: ${state.pontosLitros}L grátis`), 2000);
+  }
+
+  // Actualizar mensagem de sucesso
+  const msgEl = document.getElementById("msg-pontos");
+  if (msgEl) {
+    msgEl.innerHTML = pontosGanhos > 0
+      ? `🎁 Ganhou <strong>+${pontosGanhos}L</strong> de fidelidade! Total acumulado: <strong>${state.pontosLitros}L grátis</strong>`
+      : `💧 Total de litros acumulados: <strong>${state.pontosLitros}L grátis</strong>`;
+    msgEl.classList.remove("hidden");
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════
    WHATSAPP
 ═══════════════════════════════════════════════════════════ */
 function abrirWhatsApp() {
@@ -311,28 +347,21 @@ function abrirWhatsApp() {
   if (!p) return;
 
   const msg = encodeURIComponent(
-    `✅ *Pedido TWEZAH recebido com sucesso!*\n\n` +
+    `✅ *Pedido TWEZAH recebido!*\n\n` +
     `🆔 ID: *${p.id}*\n` +
     `👤 Nome: ${p.nome}\n` +
+    `📞 Telefone: ${p.tel}\n` +
+    `📍 ${[p.bairro, p.rua, p.bloco, p.casa, p.apto].filter(Boolean).join(", ")}\n` +
     `💧 Quantidade: *${p.litros} litros*\n` +
-    `   • Bidões 20L: ${p.b20}\n` +
-    `   • Bidões 10L: ${p.b10}\n` +
-    `   • Bidões 5L: ${p.b5}\n` +
-    `💳 Pagamento: ${p.pagamento}\n` +
-    `📍 ${p.bairro}, ${p.rua || ""}\n\n` +
+    `   • Bidões 20L: ${p.b20} | 10L: ${p.b10} | 5L: ${p.b5}\n` +
+    `💳 Pagamento: ${p.pagamento}\n\n` +
+    `🎁 *Pontos de Fidelidade:*\n` +
+    `   +${p.pontosGanhos || 0}L ganhos neste pedido\n` +
+    `   Total acumulado: *${state.pontosLitros}L grátis*\n\n` +
     `━━━━━━━━━━━━━━━━━━━━\n` +
-    `🌊 *Como fazer pedidos TWEZAH:*\n\n` + 
-    `1️⃣ Acesse a nossa plataforma:\n` +
+    `🌊 *Faça os seus pedidos aqui:*\n` +
     `👉 https://luistola.github.io/Twezah-Entregas-/\n\n` +
-    `2️⃣ Preencha os seus dados\n` +
-    `3️⃣ Escolha a quantidade de água\n` +
-    `4️⃣ Seleccione a forma de pagamento\n` +
-    `5️⃣ Clique em *Enviar Pedido*\n\n` +
-    `━━━━━━━━━━━━━━━━━━━━\n` +
-    `💡 *Guarde este link no seu telemóvel:*\n` +
-    `https://luistola.github.io/Twezah-Entregas-/\n\n` +
-    `📞 Dúvidas? Fale connosco aqui mesmo pelo WhatsApp.\n\n` +
-    `🌊 *Obrigado por escolher TWEZAH!*`
+    `Obrigado por escolher TWEZAH! 🙏`
   );
 
   const url = `https://wa.me/${CONFIG.WHATSAPP_NUM}?text=${msg}`;
@@ -360,6 +389,7 @@ function renderHistorico() {
       </div>
       <div class="historico-qty">💧 ${p.litros}L — Bidões: ${p.b20}×20L ${p.b10}×10L ${p.b5}×5L</div>
       <div class="historico-pay">💳 ${p.pagamento}${p.entregador ? ` · 🚚 ${p.entregador}` : ""}</div>
+      ${p.pontosGanhos ? `<div class="historico-pontos">🎁 +${p.pontosGanhos}L acumulados neste pedido</div>` : ""}
       ${p.obs ? `<div style="font-size:.8rem;color:var(--text-muted)">${p.obs}</div>` : ""}
     </div>
   `).join("");
