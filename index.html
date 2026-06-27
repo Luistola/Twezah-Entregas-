@@ -78,6 +78,16 @@
 
       <!-- EDIT / FIRST-ACCESS MODE -->
       <div id="perfil-form">
+
+        <!-- AVISO IMPORTANTE -->
+        <div class="aviso-dados">
+          <span class="aviso-icon">⚠️</span>
+          <div>
+            <strong>ATENÇÃO — LEIA ANTES DE PREENCHER</strong>
+            <p>Os seus dados são guardados <u>apenas neste telemóvel</u>. Só precisará de os preencher <strong>uma única vez</strong>. Os dados <strong>NÃO se apagam</strong> ao fechar a aplicação. Só se perdem se limpar os dados do browser ou reinicializar o telemóvel de fábrica.</p>
+          </div>
+        </div>
+
         <div class="form-grid">
           <div class="form-group full">
             <label>Nome Completo *</label>
@@ -234,6 +244,7 @@
       <div id="msg-sucesso" class="msg-sucesso hidden">
         <p>✅ Pedido enviado com sucesso!</p>
         <p>A equipa <strong>TWEZAH</strong> entrará em contacto brevemente.</p>
+        <div id="msg-pontos" class="msg-pontos hidden"></div>
         <button class="btn-wpp" onclick="abrirWhatsApp()">💬 Confirmar via WhatsApp</button>
       </div>
     </section>
